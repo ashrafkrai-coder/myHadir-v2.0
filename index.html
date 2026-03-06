@@ -801,6 +801,7 @@
     const GURU_PASSWORD = 'myHadir1234';
     const CACHE_KEY = 'myhadir_cache_v2';
     const MASTER_MURID_KEY = 'myhadir_master_murid_v1';
+    let aksesInputManualDiluluskan = false;
     const PAUTAN_REKOD_PANTAS = {
       '5 PVMA': [
         { nama: 'AINUL MARDHIAH BINTI MOHD SULAIMAN', url: 'https://VJT5ys.short.gy/O74bHu' },
@@ -1151,6 +1152,15 @@
     }
 
     function bukaInputManual() {
+      if (!aksesInputManualDiluluskan) {
+        const kataLaluan = window.prompt('Masukkan password untuk buka menu Input Manual:');
+        if (kataLaluan === null) return;
+        if (kataLaluan !== GURU_PASSWORD) {
+          toast('Password salah. Menu Input Manual tidak dibuka.', 'warn');
+          return;
+        }
+        aksesInputManualDiluluskan = true;
+      }
       el.manualSection.classList.remove('hidden');
       isiPilihanKelasManual(el.filterKelas.value || '');
       el.manualNama.value = '';
@@ -1257,11 +1267,13 @@
     function normalKelasLabel(value) {
       const text = String(value || '').trim().replace(/\s+/g, ' ');
       if (!text) return '';
-      const ringkas = text.match(/^(\d)\s*([a-z])$/i);
-      if (ringkas) return `${ringkas[1]} ${ringkas[2].toUpperCase()}`;
-      const penuh = text.match(/^(\d)\s+([a-z])$/i);
-      if (penuh) return `${penuh[1]} ${penuh[2].toUpperCase()}`;
-      return text.toUpperCase() === text ? text : text.replace(/\b([a-z])/g, s => s.toUpperCase());
+
+      const kelasBernombor = text.match(/^(\d+)\s*(.+)$/);
+      if (kelasBernombor) {
+        return `${kelasBernombor[1]} ${kelasBernombor[2].trim().toUpperCase()}`;
+      }
+
+      return text.toUpperCase();
     }
 
     function bacaKelas(item) {
@@ -1295,7 +1307,6 @@
       return Boolean(
         bacaTarikh(item)
         || bacaStatusMentah(item)
-        || bacaMedan(item, ['Masa', 'masa', 'Masa Kehadiran', 'masa kehadiran'])
       );
     }
 
@@ -1589,7 +1600,11 @@
     }
 
     function rowsDitapis() {
-      return rowsDitapisAsas();
+      const rows = rowsDitapisAsas();
+      if (!adaImbasanKad(rows)) {
+        return rows.filter(item => normalStatus(bacaStatusMentah(item)) !== 'Tidak Hadir');
+      }
+      return rows;
     }
 
     function sortRows(rows) {
@@ -1798,7 +1813,6 @@
       doc.text('Nama', x + 30, y);
       doc.text('Kelas', x + 290, y);
       doc.text('Status', x + 360, y);
-      doc.text('Masa', x + 445, y);
       y += 8;
       doc.line(x, y, pageW - 40, y);
       y += 14;
@@ -1811,13 +1825,11 @@
         const nama = (bacaNama(item) || '-').slice(0, 40);
         const kelasRow = bacaKelas(item).slice(0, 10);
         const status = normalStatus(bacaStatusMentah(item));
-        const masa = bacaMedan(item, ['Masa', 'masa', 'Masa Kehadiran', 'masa kehadiran']).slice(0, 12) || '-';
 
         doc.text(String(idx + 1), x, y);
         doc.text(nama, x + 30, y);
         doc.text(kelasRow, x + 290, y);
         doc.text(status, x + 360, y);
-        doc.text(masa, x + 445, y);
         y += 14;
       });
 
