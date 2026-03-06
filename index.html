@@ -1265,15 +1265,24 @@
     }
 
     function normalKelasLabel(value) {
-      const text = String(value || '').trim().replace(/\s+/g, ' ');
+      const text = String(value || '')
+        .replace(/[\u200B-\u200D\uFEFF]/g, '')
+        .replace(/[^\S\r\n]+/g, ' ')
+        .trim();
       if (!text) return '';
 
       const kelasBernombor = text.match(/^(\d+)\s*(.+)$/);
       if (kelasBernombor) {
-        return `${kelasBernombor[1]} ${kelasBernombor[2].trim().toUpperCase()}`;
+        let suffix = kelasBernombor[2]
+          .trim()
+          .toUpperCase()
+          .replace(/[^A-Z0-9]/g, '');
+        if (suffix === 'PVAMA' || suffix === 'PVMA') suffix = 'PVMA';
+        return `${kelasBernombor[1]} ${suffix}`;
       }
 
-      return text.toUpperCase();
+      const tanpaSimbol = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      return tanpaSimbol === 'PVAMA' ? 'PVMA' : tanpaSimbol;
     }
 
     function bacaKelas(item) {
