@@ -1,10 +1,10 @@
-const CACHE_NAME = 'dashboard-kehadiran-v18';
+const CACHE_NAME = 'dashboard-kehadiran-v19';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './icon-192.png',
-  './icon-512.png',
+  './icon-192x192.png',
+  './icon-512x512.png',
   './Untitled design.svg'
 ];
 
